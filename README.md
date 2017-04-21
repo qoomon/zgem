@@ -1,0 +1,2 @@
+# zgem
+zsh dependency manager
