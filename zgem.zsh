@@ -1,13 +1,13 @@
 autoload +X -U colors && colors
 
 ########################## zgem #########################
+ZGEM_VERBOSE="${ZGEM_VERBOSE:-false}"
+
 declare -rx ZGEM_HOME="$(dirname "$0")"
 
 declare -rx ZGEM_GEM_DIR=${ZGEM_GEM_DIR:-"$ZGEM_HOME/gems"}
 
-ZGEM_UTILS_DIR=${UTILS_DIR:-"$HOME"}
-
-ZGEM_VERBOSE="${ZGEM_VERBOSE:-false}"
+ZGEM_UTILS_DIR=${ZGEM_UTILS_DIR:-"$HOME"}
 
 function zgem {
   local cmd="$1"
@@ -41,15 +41,15 @@ function __zgem::reload {
 }
 
 function __zgem::clean {
-  local gem_name="$1"
 
-  if [ -z "$gem_name" ]; then
-    __zgem::log info "Press ENTER to remove all gems from '$ZGEM_GEM_DIR/'..." && read
-  else
+  if [ -n "$1" ]; then
+    local gem_name="$1"
     __zgem::log info "Press ENTER to remove gem '$gem_name' from '$ZGEM_GEM_DIR/$gem_name'..." && read
+    rm -rf "$ZGEM_GEM_DIR/$gem_name"
+  else
+    __zgem::log info "Press ENTER to remove all gems from '$ZGEM_GEM_DIR/'..." && read
+    rm -rf "$ZGEM_GEM_DIR"
   fi
-
-  rm -rf "$ZGEM_GEM_DIR/$gem_name"
 }
 
 function __zgem::bundle {
@@ -159,12 +159,13 @@ function __zgem::add::plugin {
 }
 
 function __zgem::update {
-  __zgem::log info "${fg_bold[green]}update ${fg_bold[magenta]} zgem ${fg_bold[black]}($ZGEM_HOME)${reset_color}";
+  __zgem::log info "${fg_bold[green]}update ${fg_bold[black]}($ZGEM_HOME)${reset_color}";
   (cd "$ZGEM_HOME"; git pull)
 }
 
 function __zgem::upgrade_gem {
-  local gem_dir=$1
+  local gem_name=$1
+  local gem_dir="$ZGEM_GEM_DIR/$gem_name"
   local protocol="$(cat "$gem_dir/.gem")"
   if type "__zgem::upgrade::$protocol" > /dev/null; then
     local gem_name="$(__zgem::basename "$gem_dir")"
@@ -176,13 +177,13 @@ function __zgem::upgrade_gem {
 }
 
 function __zgem::upgrade {
-  if [ -n "$1"]; then
-    local gem_dir=$1
-    __zgem::upgrade_gem $gem_dir
-  else 
+  if [ -n "$1" ]; then
+    local gem_name=$1
+    __zgem::upgrade_gem "$gem_name"
+  else
     __zgem::update
     for gem_dir in $(find "$ZGEM_GEM_DIR" -type d -mindepth 1 -maxdepth 1); do
-      __zgem::upgrade_gem $gem_dir
+      __zgem::upgrade_gem "$(basename "$gem_dir")"
     done
   fi
 }
