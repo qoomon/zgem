@@ -1,8 +1,9 @@
 autoload +X -U colors && colors
 
 ########################## zgem #########################
+declare -rx ZGEM_HOME="$(dirname "$0")"
 
-declare -rx ZGEM_DIR=${ZGEM_DIR:-"$HOME/.zgem"}
+declare -rx ZGEM_GEM_DIR=${ZGEM_GEM_DIR:-"$ZGEM_HOME/gems"}
 
 ZGEM_UTILS_DIR=${UTILS_DIR:-"$HOME"}
 
@@ -39,12 +40,12 @@ function __zgem::clean {
   local gem_name="$1"
 
   if [ -z "$gem_name" ]; then
-    __zgem::log info "Press ENTER to remove all gems from '$ZGEM_DIR/'..." && read
+    __zgem::log info "Press ENTER to remove all gems from '$ZGEM_GEM_DIR/'..." && read
   else
-    __zgem::log info "Press ENTER to remove gem '$gem_name' from '$ZGEM_DIR/$gem_name'..." && read
+    __zgem::log info "Press ENTER to remove gem '$gem_name' from '$ZGEM_GEM_DIR/$gem_name'..." && read
   fi
 
-  rm -rf "$ZGEM_DIR/$gem_name"
+  rm -rf "$ZGEM_GEM_DIR/$gem_name"
 }
 
 function __zgem::bundle {
@@ -98,7 +99,7 @@ function __zgem::bundle {
     ################ download gem ################
     if type "__zgem::name::$protocol" > /dev/null; then
       gem_name="$(__zgem::name::$protocol "$location")"
-      gem_dir="${ZGEM_DIR}/${gem_name}"
+      gem_dir="${ZGEM_GEM_DIR}/${gem_name}"
     else
       __zgem::log error "command not found '__zgem::name::$protocol'" && return 1
     fi
@@ -154,7 +155,7 @@ function __zgem::add::plugin {
 }
 
 function __zgem::update {
-  for gem_dir in $(find "$ZGEM_DIR" -type d -mindepth 1 -maxdepth 1); do
+  for gem_dir in $(find "$ZGEM_GEM_DIR" -type d -mindepth 1 -maxdepth 1); do
     local protocol="$(cat "$gem_dir/.gem")"
     if type "__zgem::update::$protocol" > /dev/null; then
       local gem_name="$(__zgem::basename "$gem_dir")"
