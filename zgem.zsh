@@ -21,6 +21,10 @@ function zgem {
       __zgem::update $@
       __zgem::reload
       ;;
+    'upgrade')
+      __zgem::upgrade $@
+      __zgem::reload
+      ;;
     'clean')
       __zgem::clean $@
       ;;
@@ -155,16 +159,32 @@ function __zgem::add::plugin {
 }
 
 function __zgem::update {
-  for gem_dir in $(find "$ZGEM_GEM_DIR" -type d -mindepth 1 -maxdepth 1); do
-    local protocol="$(cat "$gem_dir/.gem")"
-    if type "__zgem::update::$protocol" > /dev/null; then
-      local gem_name="$(__zgem::basename "$gem_dir")"
-      __zgem::log info "${fg_bold[green]}update ${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
-      __zgem::update::$protocol $gem_dir
-    else
-      __zgem::log error "command not found '__zgem::update::$protocol' gem directory: '${gem_dir}'"
-    fi
-  done
+  __zgem::log info "${fg_bold[green]}update ${fg_bold[magenta]} zgem ${fg_bold[black]}($ZGEM_HOME)${reset_color}";
+  (cd "$ZGEM_HOME"; git pull)
+}
+
+function __zgem::upgrade_gem {
+  local gem_dir=$1
+  local protocol="$(cat "$gem_dir/.gem")"
+  if type "__zgem::upgrade::$protocol" > /dev/null; then
+    local gem_name="$(__zgem::basename "$gem_dir")"
+    __zgem::log info "${fg_bold[green]}upgrade ${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
+    __zgem::upgrade::$protocol $gem_dir
+  else
+    __zgem::log error "command not found '__zgem::upgrade::$protocol' gem directory: '${gem_dir}'"
+  fi
+}
+
+function __zgem::upgrade {
+  if [ -n "$1"]; then
+    local gem_dir=$1
+    upgrade_gem $gem_dir
+  else 
+    __zgem::update
+    for gem_dir in $(find "$ZGEM_GEM_DIR" -type d -mindepth 1 -maxdepth 1); do
+      upgrade_gem $gem_dir
+    done
+  fi
 }
 
 #### faster than basename command
@@ -223,7 +243,7 @@ function __zgem::download::http {
   )
 }
 
-function __zgem::update::http {
+function __zgem::upgrade::http {
   local gem_dir="$1"
   (
     cd "$gem_dir"
@@ -264,7 +284,7 @@ function __zgem::download::git {
   )
 }
 
-function __zgem::update::git {
+function __zgem::upgrade::git {
   local gem_dir="$1"
   (
     cd "$gem_dir"
