@@ -12,7 +12,10 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
 ```
   
 ### usage
-`zgem bundle 'https://github.com/qoomon/zsh-jumper.git' from:'git' use:'zsh-jumper.zsh' as: plugin`
+load plugin form git source `zgem bundle 'https://github.com/qoomon/zsh-jumper.git' from:'git' use:'zsh-jumper.zsh'`
+load plugin from local source `zgem bundle "$HOME/.zsh/awesome.zsh"`
+load completion from http source `zgem bundle "http://example.org/completions/_awesome" from:http as:completion`
+load plugin on demand from $ZGEM_UTILS_DIR directory `zgem awesome`
 
 #### parameters
 * from
