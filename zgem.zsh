@@ -178,11 +178,11 @@ function __zgem::upgrade_gem {
 function __zgem::upgrade {
   if [ -n "$1"]; then
     local gem_dir=$1
-    upgrade_gem $gem_dir
+    __zgem::upgrade_gem $gem_dir
   else 
     __zgem::update
     for gem_dir in $(find "$ZGEM_GEM_DIR" -type d -mindepth 1 -maxdepth 1); do
-      upgrade_gem $gem_dir
+      __zgem::upgrade_gem $gem_dir
     done
   fi
 }
