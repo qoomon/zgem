@@ -20,6 +20,10 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
   * http
   * file (default)
   
+* use
+  * custom file name to load
+  * basename from source url (default)
+  
 * as
   * completion
   * plugin (default)
