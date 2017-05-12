@@ -277,7 +277,7 @@ function __zgem::name::git {
 
 function __zgem::download::git {
   local repo_url="${1%#*}" # remove branch name
-  local repo_branch=$(echo $1 | sed 's|[^#]*\(.*\)|\1|')
+  local repo_branch=$(echo $1 | sed 's|[^#]*#*\(.*\)|\1|')
   local gem_dir="$2"
   (
     cd "$gem_dir"
@@ -286,7 +286,7 @@ function __zgem::download::git {
     if [[ -n $repo_branch ]]; then
       branch_param="--branch '$repo_branch'"
     fi
-    git clone --single-branch ${=branch_param} "$repo_url" "$clone_dir" && mv "$clone_dir/"*(DN) . && rmdir "$clone_dir"
+    git clone --single-branch ${(Q)=branch_param} "$repo_url" "$clone_dir" && mv "$clone_dir/"*(DN) . && rmdir "$clone_dir"
   )
 }
 
