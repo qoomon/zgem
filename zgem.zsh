@@ -3,7 +3,12 @@ autoload +X -U colors && colors
 ########################## zgem #########################
 ZGEM_VERBOSE="${ZGEM_VERBOSE:-false}"
 
-declare -rx ZGEM_HOME="$(dirname "$0")"
+# Variable Modifiers
+# :h - like dirname
+# :t - like basename
+# %  - remove smallest matching pattern from end of value
+
+declare -rx ZGEM_HOME=${0:h}
 
 declare -rx ZGEM_GEM_DIR=${ZGEM_GEM_DIR:-"$ZGEM_HOME/gems"}
 
@@ -42,7 +47,7 @@ function __zgem::reload {
 
 function __zgem::clean {
 
-  if [ -n "$1" ]; then
+  if [[ -n "$1" ]]; then
     local gem_name="$1"
     __zgem::log info "Press ENTER to remove gem '$gem_name' from '$ZGEM_GEM_DIR/$gem_name'..." && read
     rm -rf "$ZGEM_GEM_DIR/$gem_name"
@@ -64,25 +69,25 @@ function __zgem::bundle {
   ################ parse parameters ################
 
   local protocol='file'
-  local gem_file="$(__zgem::basename "$location")"
+  local gem_file=${location:t}
   local gem_type='plugin'
   local lazy_load=''
   for param in "$@"; do
-    local param_key="${param[(ws|:|)1]}"
-    local param_value="${param[(ws|:|)2]}"
+    local param_key=${param[(ws|:|)1]}
+    local param_value=${param[(ws|:|)2]}
 
     case "$param_key" in
       'from')
-        protocol="$param_value"
+        protocol=$param_value
         ;;
       'use')
-        gem_file="$param_value"
+        gem_file=$param_value
         ;;
       'as')
-        gem_type="$param_value"
+        gem_type=$param_value
         ;;
       'lazy')
-        lazy_load="$param_value"
+        lazy_load=$param_value
         ;;
       *)
         __zgem::log error "Unknown parameter '$param_key'"
@@ -96,9 +101,9 @@ function __zgem::bundle {
   local gem_name
   local gem_dir
 
-  if [ "$protocol" = 'file' ]; then
-    gem_name="$(__zgem::basename "$location")"
-    gem_dir="$(__zgem::dirname "$location")"
+  if [[ "$protocol" == 'file' ]]; then
+    gem_name=${location:t}
+    gem_dir=${location:h}
   else
     ################ download gem ################
     if type "__zgem::name::$protocol" > /dev/null; then
@@ -108,7 +113,7 @@ function __zgem::bundle {
       __zgem::log error "command not found '__zgem::name::$protocol'" && return 1
     fi
 
-    if [ ! -e "$gem_dir" ]; then
+    if [[ ! -e "$gem_dir" ]]; then
       if ! type "__zgem::download::$protocol" > /dev/null; then
         __zgem::log error "command not found '__zgem::download::$protocol'" && return 1
       fi
@@ -139,7 +144,7 @@ function __zgem::bundle {
 
 function __zgem::add::completion {
   local file="$1"
-  fpath=($fpath "$(__zgem::dirname "$file")")
+  fpath=($fpath ${file:h})
 }
 
 function __zgem::add::plugin {
@@ -147,7 +152,7 @@ function __zgem::add::plugin {
   local gem_file="$2"
   local lazy_functions="$3"
 
-  if [ -z "$lazy_functions" ]; then
+  if [[ -z "$lazy_functions" ]]; then
     source "$gem_file"
   else
     __zgem::log debug "    ${fg[blue]}lazy${reset_color} ${lazy_functions}"
@@ -166,9 +171,9 @@ function __zgem::update {
 function __zgem::upgrade_gem {
   local gem_name=$1
   local gem_dir="$ZGEM_GEM_DIR/$gem_name"
-  local protocol="$(cat "$gem_dir/.gem")"
+  local protocol="$(< "$gem_dir/.gem")"
   if type "__zgem::upgrade::$protocol" > /dev/null; then
-    local gem_name="$(__zgem::basename "$gem_dir")"
+    local gem_name=${gem_dir:t}
     __zgem::log info "${fg_bold[green]}upgrade ${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
     __zgem::upgrade::$protocol $gem_dir
   else
@@ -177,31 +182,15 @@ function __zgem::upgrade_gem {
 }
 
 function __zgem::upgrade {
-  if [ -n "$1" ]; then
+  if [[ -n "$1" ]]; then
     local gem_name=$1
     __zgem::upgrade_gem "$gem_name"
   else
     __zgem::update
-    for gem_dir in $(find "$ZGEM_GEM_DIR" -type d -mindepth 1 -maxdepth 1); do
-      __zgem::upgrade_gem "$(basename "$gem_dir")"
+    for gem_dir in "$ZGEM_GEM_DIR"/*(/); do
+      __zgem::upgrade_gem ${gem_dir:t}
     done
   fi
-}
-
-#### faster than basename command
-function __zgem::basename {
-  local name="$1"
-  local sufix="$2"
-  name="${name##*/}"
-  name="${name%$sufix}"
-  echo "$name"
-}
-
-#### faster than dirname command
-function __zgem::dirname {
-  local name="$1"
-  name="${name%/*}"
-  echo "$name"
 }
 
 function __zgem::log {
@@ -230,7 +219,7 @@ function __zgem::log {
 
 function __zgem::name::http {
   local http_url="$1"
-  __zgem::basename "$http_url"
+  echo ${http_url:t}
 }
 
 function __zgem::download::http {
@@ -248,19 +237,19 @@ function __zgem::upgrade::http {
   local gem_dir="$1"
   (
     cd "$gem_dir"
-    local http_url=$(cat "$gem_dir/.http")
-    local file_name="$(__zgem::basename "$http_url")"
+    local http_url=$(< "$gem_dir/.http")
+    local file_name=${http_url:t}
     local cksum_before=$(cksum "$file_name")
     curl -s -L -w %{http_code} -o "$file_name" -z "$file_name" $http_url | read -r response_code
     local cksum_after=$(cksum "$file_name")
-    if [ $response_code = '200' ]; then
-      if [ $cksum_after != $cksum_before ]; then
+    if [[ $response_code == '200' ]]; then
+      if [[ $cksum_after != $cksum_before ]]; then
         echo "From $http_url"
         echo "Updated."
       else
         echo "Current file is up to date"
       fi
-    elif [ $response_code = '304' ]; then
+    elif [[ $response_code == '304' ]]; then
       echo "Current file is up to date"
     else
       __zgem::log error "http update error response code: $response_code from '$http_url'"
@@ -271,22 +260,22 @@ function __zgem::upgrade::http {
 ############################# git #############################
 
 function __zgem::name::git {
-  local repo_url="${1%#*}" # remove branch name
-  __zgem::basename "$repo_url" '.git'
+  local repo_url=${${1/%/#}[(ws:#:)1]} # get repo url without branch
+  echo ${${repo_url:t}%'.git'}
 }
 
-function __zgem::download::git {
-  local repo_url="${1%#*}" # remove branch name
-  local repo_branch=$(echo $1 | sed 's|[^#]*#*\(.*\)|\1|')
+function __zgem::download::git {  
+  local repo_url=${${1/%/#}[(ws:#:)1]} # get repo url
+  local repo_branch=${${1/%/#}[(ws:#:)2]} # get repo branch
   local gem_dir="$2"
+  local clone_dir="git_repo"
   (
     cd "$gem_dir"
-    local clone_dir="git_repo"
-    local branch_param
-    if [[ -n $repo_branch ]]; then
-      branch_param="--branch '$repo_branch'"
-    fi
-    git clone --single-branch ${(Q)=branch_param} "$repo_url" "$clone_dir" && mv "$clone_dir/"*(DN) . && rmdir "$clone_dir"
+    git clone \
+      ${(Q)=${repo_branch:+"--branch '$repo_branch'"}} \
+      --single-branch  "$repo_url" "$clone_dir" \
+    && mv "$clone_dir/"*(DN) . \
+    && rmdir "$clone_dir"
   )
 }
 
