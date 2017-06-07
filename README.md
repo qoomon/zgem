@@ -21,7 +21,7 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
 * load completion from http source
   * `zgem bundle "http://example.org/completions/_awesome" from:http as:completion`
 * load plugin on demand from $ZGEM_UTILS_DIR directory
-  * `zgem awesome`
+  * `zgem zsh-jumper`
 * clean all gems
   * `zgem clean`
 * clean one gem
