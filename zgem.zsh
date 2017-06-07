@@ -8,7 +8,7 @@ ZGEM_VERBOSE="${ZGEM_VERBOSE:-false}"
 # :t - like basename
 # %  - remove smallest matching pattern from end of value
 
-declare -rx ZGEM_HOME=${0:h}
+declare -rx ZGEM_HOME=${ZGEM_HOME:-"$HOME/.zgem"}
 
 declare -rx ZGEM_GEM_DIR=${ZGEM_GEM_DIR:-"$ZGEM_HOME/gems"}
 
