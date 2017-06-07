@@ -26,6 +26,12 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
   * `zgem clean`
 * clean one gem
   * `zgem clean zsh-jumper`
+* upgrade all gems
+  * `zgem upgrade`
+* upgrade one gem
+  * `zgem upgrade zsh-jumper`
+* update zgem
+  * `zgem update`
 
 #### parameters
 * from
