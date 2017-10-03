@@ -58,6 +58,13 @@ function __zgem::clean {
 }
 
 function __zgem::bundle {
+  
+  if [[ -z "$1" ]]; then
+    for file in "$ZGEM_UTILS_DIR/"*".zsh"; do
+      source "$file"
+    done
+    return 0
+  fi
 
   if [[ "$1" != */* ]]; then
     source "$ZGEM_UTILS_DIR/$1.zsh"
