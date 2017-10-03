@@ -59,8 +59,8 @@ function __zgem::clean {
 
 function __zgem::bundle {
   
-  if [[ -z "$1" ]]; then
-    for file in "$ZGEM_UTILS_DIR/"*".zsh"; do
+  if [[ "$1" == 'all' ]]; then
+    for file in "$ZGEM_UTILS_DIR/"*'.zsh'; do
       source "$file"
     done
     return 0
