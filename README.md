@@ -5,7 +5,7 @@ zsh dependency manager
   
 ```
 #### load zgem 
-ZGEM_HOME="$HOME/.zgem"
+ZGEM_HOME="$HOME/.zsh.zgem"
 ZGEM_GEM_DIR="$ZGEM_HOME/gems" # optional
 ZGEM_UTILS_DIR="$HOME" # optional
 
