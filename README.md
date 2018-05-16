@@ -14,7 +14,7 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
 ```
   
 ### usage
-* load plugin form git source 
+* load plugin from git source 
   * `zgem bundle 'https://github.com/qoomon/zsh-jumper.git' from:'git' use:'zsh-jumper.zsh'`
 * load plugin from local source
   * `zgem bundle "$HOME/.zsh/awesome.zsh"`
