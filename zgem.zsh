@@ -22,6 +22,9 @@ function zgem {
     'bundle')
       __zgem::bundle $@
       ;;
+    'list')
+      __zgem::list $@
+      ;;
     'update')
       __zgem::update $@
       __zgem::reload
@@ -55,6 +58,23 @@ function __zgem::clean {
     __zgem::log info "Press ENTER to remove all gems from '$ZGEM_GEM_DIR/'..." && read
     rm -rf "$ZGEM_GEM_DIR"
   fi
+}
+
+function __zgem::list {
+  local gem="$1"
+  if [ -n "$gem" ]; then
+      __zgem::list_gem ${gem}
+  else
+    for gem_dir in "$ZGEM_GEM_DIR"/*(/); do
+      __zgem::list_gem ${gem_dir:t}
+    done
+  fi
+}
+
+function __zgem::list_gem {
+  local gem_name=$1
+  local gem_dir="$ZGEM_GEM_DIR/$gem_name"
+  __zgem::log info "${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
 }
 
 function __zgem::bundle {
