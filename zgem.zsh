@@ -14,6 +14,8 @@ declare -rx ZGEM_GEM_DIR=${ZGEM_GEM_DIR:-"$ZGEM_HOME/gems"}
 
 ZGEM_UTILS_DIR=${ZGEM_UTILS_DIR:-"$HOME"}
 
+declare -aU zgems=()
+
 function zgem {
   local cmd="$1"
   shift
@@ -61,14 +63,9 @@ function __zgem::clean {
 }
 
 function __zgem::list {
-  local gem="$1"
-  if [ -n "$gem" ]; then
-      __zgem::list_gem ${gem}
-  else
-    for gem_dir in "$ZGEM_GEM_DIR"/*(/); do
-      __zgem::list_gem ${gem_dir:t}
-    done
-  fi
+  for gem_path in $zgems; do
+    __zgem::log info "${fg_bold[magenta]}${gem_path:t} ${fg_bold[black]}($gem_path)${reset_color}";
+  done
 }
 
 function __zgem::list_gem {
@@ -81,13 +78,13 @@ function __zgem::bundle {
   
   if [[ "$1" == 'all' ]]; then
     for file in "$ZGEM_UTILS_DIR/"*'.zsh'; do
-      source "$file"
+      __zgem::bundle "$file"
     done
     return 0
   fi
 
   if [[ "$1" != */* ]]; then
-    source "$ZGEM_UTILS_DIR/$1.zsh"
+    __zgem::bundle "$ZGEM_UTILS_DIR/$1.zsh"
     return $status
   fi
 
@@ -98,7 +95,6 @@ function __zgem::bundle {
   local protocol='file'
   local gem_file=${location:t}
   local gem_type='plugin'
-  local lazy_load=''
   for param in "$@"; do
     local param_key=${param[(ws|:|)1]}
     local param_value=${param[(ws|:|)2]}
@@ -113,9 +109,6 @@ function __zgem::bundle {
       'as')
         gem_type=$param_value
         ;;
-      'lazy')
-        lazy_load=$param_value
-        ;;
       *)
         __zgem::log error "Unknown parameter '$param_key'"
         __zgem::log error "Parameter: {from|use|as}"
@@ -129,38 +122,47 @@ function __zgem::bundle {
   local gem_dir
 
   if [[ "$protocol" == 'file' ]]; then
+    location=$(realpath -s $location) 
     gem_name=${location:t}
     gem_dir=${location:h}
+  elif type "__zgem::name::$protocol" > /dev/null; then
+    gem_name="$(__zgem::name::$protocol "$location")"
+    gem_dir="${ZGEM_GEM_DIR}/${gem_name}"
   else
-    ################ download gem ################
-    if type "__zgem::name::$protocol" > /dev/null; then
-      gem_name="$(__zgem::name::$protocol "$location")"
-      gem_dir="${ZGEM_GEM_DIR}/${gem_name}"
-    else
-      __zgem::log error "command not found '__zgem::name::$protocol'" && return 1
-    fi
-
-    if [[ ! -e "$gem_dir" ]]; then
-      if ! type "__zgem::download::$protocol" > /dev/null; then
-        __zgem::log error "command not found '__zgem::download::$protocol'" && return 1
-      fi
-
-      mkdir -p "$gem_dir"
-      echo "$protocol" > "$gem_dir/.gem"
-      __zgem::log info "${fg_bold[green]}download ${fg_bold[magenta]}${gem_name}${reset_color}\n       ${fg_bold[yellow]}into${reset_color} '$gem_dir'\n       ${fg_bold[yellow]}from${reset_color} $protocol '$location'"
-      __zgem::download::$protocol "$location" "$gem_dir"
-    fi
+    __zgem::log error "command not found '__zgem::name::$protocol'"
+    return 1
   fi
+
+  if [[ ! -e "$gem_dir" ]]; then
+    if ! type "__zgem::download::$protocol" > /dev/null; then
+      __zgem::log error "command not found '__zgem::download::$protocol'"
+      return 1
+    fi
+
+    mkdir -p "$gem_dir"
+    echo "$protocol" > "$gem_dir/.gem"
+    __zgem::log info "${fg_bold[green]}download ${fg_bold[magenta]}${gem_name}${reset_color}\n       ${fg_bold[yellow]}into${reset_color} '$gem_dir'\n       ${fg_bold[yellow]}from${reset_color} $protocol '$location'"
+    __zgem::download::$protocol "$location" "$gem_dir"
+  fi
+  
 
   ################ add gem ################
   local gem_path="$gem_dir/$gem_file"
   __zgem::log debug "${fg_bold[green]}add ${reset_color}${(r:10:: :)gem_type}${gem_type:10}   ${fg_bold[magenta]}${(r:32:: :)gem_name}${gem_name:32} ${fg_bold[black]}($gem_path)${reset_color}"
+
+  if [[ "$protocol" == 'file' ]]; then
+    zgems+=${gem_path}
+  else
+    zgems+=${gem_dir}
+  fi
+
   case "$gem_type" in
     'plugin')
-      __zgem::add::plugin "$gem_name" "$gem_path" "$lazy_load"
+      source "$gem_path"
       ;;
     'completion')
-      __zgem::add::completion "$gem_path"
+      # only add if not present already
+      [[ -z "${fpath[(r)${gem_path:h}]}" ]] && fpath+=${gem_path:h}
       ;;
     *)
       __zgem::log error  "Unknown gem type '$protocol'"
@@ -169,55 +171,34 @@ function __zgem::bundle {
   esac
 }
 
-function __zgem::add::completion {
-  local file="$1"
-  fpath=($fpath ${file:h})
-}
-
-function __zgem::add::plugin {
-  local gem_name="$1"
-  local gem_file="$2"
-  local lazy_functions="$3"
-
-  if [[ -z "$lazy_functions" ]]; then
-    source "$gem_file"
+function __zgem::update {
+  local gem_name=$1
+  if [[ -n "$gem_name" ]]; then
+    __zgem::update_gem "$gem_name"
   else
-    __zgem::log debug "    ${fg[blue]}lazy${reset_color} ${lazy_functions}"
-    for lazy_function in ${(ps:,:)${lazy_functions}}; do
-      lazy_function=$(echo $lazy_function | tr -d ' ') # re move whitespaces
-      eval " $lazy_function() { source '$gem_file' && $lazy_function; }"
-    done
+    __zgem::log info "${fg_bold[green]}update ${fg_bold[black]}($ZGEM_HOME)${reset_color}";
+    (cd "$ZGEM_HOME"; git pull; echo  "Last Commit Date : $(git log -1 --format=%cd)";  )
   fi
 }
 
-function __zgem::update {
-  __zgem::log info "${fg_bold[green]}update ${fg_bold[black]}($ZGEM_HOME)${reset_color}";
-  (cd "$ZGEM_HOME"; git pull; echo  "Last Commit Date : $(git log -1 --format=%cd)";  )
-}
-
-function __zgem::upgrade_gem {
+function __zgem::update_gem {
   local gem_name=$1
   local gem_dir="$ZGEM_GEM_DIR/$gem_name"
   local protocol="$(< "$gem_dir/.gem")"
-  if type "__zgem::upgrade::$protocol" > /dev/null; then
+  if type "__zgem::update::$protocol" > /dev/null; then
     local gem_name=${gem_dir:t}
     __zgem::log info "${fg_bold[green]}upgrade ${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
-    __zgem::upgrade::$protocol $gem_dir
+    __zgem::update::$protocol $gem_dir
   else
     __zgem::log error "command not found '__zgem::upgrade::$protocol' gem directory: '${gem_dir}'"
   fi
 }
 
 function __zgem::upgrade {
-  if [[ -n "$1" ]]; then
-    local gem_name=$1
-    __zgem::upgrade_gem "$gem_name"
-  else
-    __zgem::update
-    for gem_dir in "$ZGEM_GEM_DIR"/*(/); do
-      __zgem::upgrade_gem ${gem_dir:t}
-    done
-  fi
+  __zgem::update
+  for gem_path in ${(M)zgems:#$ZGEM_GEM_DIR*}; do
+    __zgem::update ${gem_path:t}
+  done
 }
 
 function __zgem::log {
@@ -260,7 +241,7 @@ function __zgem::download::http {
   )
 }
 
-function __zgem::upgrade::http {
+function __zgem::update::http {
   local gem_dir="$1"
   (
     cd "$gem_dir"
@@ -306,7 +287,7 @@ function __zgem::download::git {
   )
 }
 
-function __zgem::upgrade::git {
+function __zgem::update::git {
   local gem_dir="$1"
   (
     cd "$gem_dir"
