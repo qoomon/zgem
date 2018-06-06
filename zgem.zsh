@@ -122,7 +122,7 @@ function __zgem::bundle {
   local gem_dir
 
   if [[ "$protocol" == 'file' ]]; then
-    location=$(cd $location && pwd) 
+    location=$(cd ${location:h} && echo "$PWD/${location:t}") # resolve relative path
     gem_name=${location:t}
     gem_dir=${location:h}
   elif type "__zgem::name::$protocol" > /dev/null; then
