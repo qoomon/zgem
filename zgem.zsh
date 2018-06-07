@@ -92,8 +92,8 @@ function __zgem::bundle {
   shift
   ################ parse parameters ################
 
-  local protocol='file'
-  local gem_file=${location:t}
+  local protocol
+  local gem_file
   local gem_type='plugin'
   for param in "$@"; do
     local param_key=${param[(ws|:|)1]}
@@ -116,6 +116,28 @@ function __zgem::bundle {
         ;;
     esac
   done
+    
+  if [[ -z $protocol ]]; then
+    ### determin default protocol
+    if [[ $location = *'.git' ]]; then
+      protocol='git'
+    elif [[ $location = 'https://' ]] || [[ $location = 'http://' ]]; then
+      protocol='http'
+    else
+      protocol='file'
+    fi
+  fi
+
+  if [[ -z $gem_file ]]; then
+    ### determin default gem_file
+    if [[ $protocol = 'git' ]]; then
+      gem_file="${${location:t}%.git}.zsh"
+    elif [[ $protocol = 'http' ]]; then
+      gem_file=${location:t}
+    else
+      gem_file=${location:t}
+    fi
+  fi
 
   ################ determine gem dir and file ################
   local gem_name
