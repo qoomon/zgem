@@ -131,7 +131,7 @@ function __zgem::bundle {
   if [[ -z $gem_file ]]; then
     ### determin default gem_file
     if [[ $protocol = 'git' ]]; then
-      gem_file="${${location:t}%.git}.zsh"
+      gem_file="${${location:t}%.git}.plugin.zsh"
     elif [[ $protocol = 'http' ]]; then
       gem_file=${location:t}
     else
