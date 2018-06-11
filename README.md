@@ -1,4 +1,4 @@
-# zgem
+# zgem 🐚 💎
 zsh dependency manager
 
 ### install to .zshrc
