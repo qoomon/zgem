@@ -39,9 +39,10 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
   * http
   * file (default)
   
-* use
-  * custom file name to load
-  * basename from source url (default)
+* use - custom file name to load
+  * defaults
+    * git: <repository_name>.plugin.zsh
+    * http: basename from source url
   
 * as
   * completion
