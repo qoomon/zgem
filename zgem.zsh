@@ -199,7 +199,7 @@ function __zgem::update {
     __zgem::update_gem "$gem_name"
   else
     __zgem::log info "${fg_bold[green]}update ${fg_bold[black]}($ZGEM_HOME)${reset_color}";
-    (cd "$ZGEM_HOME"; git pull; echo  "Last Commit Date : $(git log -1 --format=%cd)";  )
+    (cd "$ZGEM_HOME"; git pull --depth 1; echo  "Last Commit Date : $(git log -1 --format=%cd)";  )
   fi
 }
 
@@ -304,6 +304,7 @@ function __zgem::download::git {
     git clone \
       ${(Q)=${repo_branch:+"--branch '$repo_branch'"}} \
       --single-branch  "$repo_url" "$clone_dir" \
+      --depth 1 \
     && mv "$clone_dir/"*(DN) . \
     && rmdir "$clone_dir"
   )
