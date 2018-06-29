@@ -147,7 +147,7 @@ function __zgem::bundle {
     location=$(cd ${location:h} && echo "$PWD/${location:t}") # resolve relative path
     gem_name=${location:t}
     gem_dir=${location:h}
-  elif type "__zgem::name::$protocol" > /dev/null; then
+  elif [ $functions[__zgem::name::$protocol] ]; then
     gem_name="$(__zgem::name::$protocol "$location")"
     gem_dir="${ZGEM_GEM_DIR}/${gem_name}"
   else
@@ -156,7 +156,7 @@ function __zgem::bundle {
   fi
 
   if [[ ! -e "$gem_dir" ]]; then
-    if ! type "__zgem::download::$protocol" > /dev/null; then
+    if ! [ $functions[__zgem::download::$protocol] ]; then
       __zgem::log error "command not found '__zgem::download::$protocol'"
       return 1
     fi
@@ -207,7 +207,7 @@ function __zgem::update_gem {
   local gem_name=$1
   local gem_dir="$ZGEM_GEM_DIR/$gem_name"
   local protocol="$(< "$gem_dir/.gem")"
-  if type "__zgem::update::$protocol" > /dev/null; then
+    if [ $functions[__zgem::update::$protocol]; then
     local gem_name=${gem_dir:t}
     __zgem::log info "${fg_bold[green]}upgrade ${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
     __zgem::update::$protocol $gem_dir
