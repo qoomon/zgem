@@ -207,12 +207,12 @@ function __zgem::update_gem {
   local gem_name=$1
   local gem_dir="$ZGEM_GEM_DIR/$gem_name"
   local protocol="$(< "$gem_dir/.gem")"
-    if [ $functions[__zgem::update::$protocol]; then
+  if [ $functions[__zgem::update::$protocol] ]; then
     local gem_name=${gem_dir:t}
-    __zgem::log info "${fg_bold[green]}upgrade ${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
+    __zgem::log info "${fg_bold[green]}update ${fg_bold[magenta]}${gem_name} ${fg_bold[black]}($gem_dir)${reset_color}";
     __zgem::update::$protocol $gem_dir
   else
-    __zgem::log error "command not found '__zgem::upgrade::$protocol' gem directory: '${gem_dir}'"
+    __zgem::log error "command not found '__zgem::update::$protocol' gem directory: '${gem_dir}'"
   fi
 }
 
