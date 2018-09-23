@@ -76,7 +76,7 @@ function __zgem::list_gem {
 
 function __zgem::bundle {
   
-  if [[ "$1" == 'all' ]]; then
+  if [[ $# == 0 ]]; then
     for file in "$ZGEM_UTILS_DIR/"*'.zsh'; do
       __zgem::bundle "$file"
     done
