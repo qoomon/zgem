@@ -36,16 +36,17 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
   * `zgem update`
 
 #### parameters
-* from
-  * git
-  * http
+* from - specify source protocol
   * file (default)
-  
-* use - custom file name to load
+  * http
+  * git
+
+* use - specify custom file name to load
   * defaults
     * git: <repository_name>.plugin.zsh
     * http: basename from source url
   
-* as
-  * completion
+* as - specify gem type
   * plugin (default)
+  * completion
+
