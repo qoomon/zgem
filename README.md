@@ -19,7 +19,7 @@ source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
 * load plugin from local source
   * `zgem bundle "$HOME/.zsh/awesome.zsh"`
 * load completion from http source
-  * `zgem bundle "http://example.org/completions/_awesome" from:http as:completion`
+  * `zgem bundle "http://example.org/completions/_awesome" as:completion`
 * load all utils from $ZGEM_UTILS_DIR directory
   * `zgem bundle`
 * load on util from $ZGEM_UTILS_DIR directory
