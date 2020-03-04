@@ -12,7 +12,7 @@ declare -rx ZGEM_HOME=${ZGEM_HOME:-"$HOME/.zgem"}
 
 declare -rx ZGEM_GEM_DIR=${ZGEM_GEM_DIR:-"$ZGEM_HOME/gems"}
 
-ZGEM_UTILS_DIR=${ZGEM_UTILS_DIR:-"$HOME"}
+ZGEM_UTILS_DIR=$ZGEM_UTILS_DIR
 
 declare -aU zgems=()
 
@@ -77,6 +77,10 @@ function __zgem::list_gem {
 function __zgem::bundle {
   
   if [[ $# == 0 ]]; then
+    if [[ ! $ZGEM_UTILS_DIR ]]; then
+      __zgem::log error "ZGEM_UTILS_DIR is not defined"
+      return 1
+    fi
     for file in "$ZGEM_UTILS_DIR/"*'.zsh'; do
       __zgem::bundle "$file"
     done
@@ -84,6 +88,10 @@ function __zgem::bundle {
   fi
 
   if [[ "$1" != */* ]]; then
+    if [[ ! $ZGEM_UTILS_DIR ]]; then
+      __zgem::log error "ZGEM_UTILS_DIR is not defined"
+      return 1
+    fi
     __zgem::bundle "$ZGEM_UTILS_DIR/$1.zsh"
     return $status
   fi
