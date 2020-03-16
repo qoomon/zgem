@@ -6,10 +6,10 @@ zsh dependency manager
 ```
 #### load zgem 
 ZGEM_HOME="$HOME/.zsh.zgem"
-ZGEM_GEM_DIR="$ZGEM_HOME/gems" # optional
-ZGEM_UTILS_DIR="$HOME" # optional
+# ZGEM_GEM_DIR="$ZGEM_HOME/gems"
+# ZGEM_UTILS_DIR="$HOME"
 
-test ! -e "$ZGEM_HOME" && git clone 'https://github.com/qoomon/zgem.git' "$ZGEM_HOME"
+[[ -e "$ZGEM_HOME" ]] || git clone 'https://github.com/qoomon/zgem.git' "$ZGEM_HOME"
 source "$ZGEM_HOME/zgem.zsh" # && ZGEM_VERBOSE='true'
 ```
   
