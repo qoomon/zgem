@@ -21,8 +21,8 @@ source "$ZGEM_HOME/zgem.zsh"
   * `zgem bundle "http://example.org/completions/_awesome" from:http as:completion`
 * load all utils from `$ZGEM_UTILS_DIR` directory
   * `zgem bundle`
-* load on util from `$ZGEM_UTILS_DIR` directory
-  * `zgem bundle example-util
+* load one util from `$ZGEM_UTILS_DIR` directory
+  * `zgem bundle example-util`
 * clean all gems
   * `zgem clean`
 * clean one gem
