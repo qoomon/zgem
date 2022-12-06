@@ -207,7 +207,7 @@ function __zgem::update {
     __zgem::update_gem "$gem_name"
   else
     __zgem::log info "${fg_bold[green]}update ${fg_bold[black]}($ZGEM_HOME)${reset_color}";
-    (cd "$ZGEM_HOME"; git pull --depth 1; echo  "Last Commit Date : $(git log -1 --format=%cd)";  )
+    (cd "$ZGEM_HOME"; git pull --depth 1; echo  "Last Commit Date : $(git --no-pager log -1 --format=%cd)";  )
   fi
 }
 
@@ -324,7 +324,7 @@ function __zgem::update::git {
     cd "$gem_dir"
     local latest_commit_before=$(git rev-parse HEAD)
     git pull # --depth 1
-    echo  "Last Commit Date : $(git log -1 --format=%cd)"; 
+    echo  "Last Commit Date : $(git --no-pager log -1 --format=%cd)"; 
     local latest_commit_after=$(git rev-parse HEAD)
     if [ $latest_commit_after != $latest_commit_before ]; then
       git diff --name-status $latest_commit_before $latest_commit_after
