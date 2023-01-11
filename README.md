@@ -23,15 +23,16 @@ source "$ZGEM_HOME/zgem.zsh"
   * `zgem bundle`
 * load one util from `$ZGEM_UTILS_DIR` directory
   * `zgem bundle example-util`
-* clean all gems
-  * `zgem clean`
-* clean one gem
-  * `zgem clean example-util`
+
+* list all gems
+* `zgem list`
+
 * upgrade all gems
   * `zgem upgrade`
 * upgrade one gem
   * `zgem upgrade example-util`
-* update zgem
+
+* update zgem itself
   * `zgem update`
 
 #### parameters

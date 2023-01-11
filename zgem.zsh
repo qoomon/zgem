@@ -24,6 +24,10 @@ function zgem {
     'bundle')
       __zgem::bundle $@
       ;;
+    'upgrade')
+      __zgem::upgrade $@
+      __zgem::reload
+      ;;
     'list')
       __zgem::list $@
       ;;
@@ -31,16 +35,9 @@ function zgem {
       __zgem::update $@
       __zgem::reload
       ;;
-    'upgrade')
-      __zgem::upgrade $@
-      __zgem::reload
-      ;;
-    'clean')
-      __zgem::clean $@
-      ;;
     *)
       __zgem::log error "Unknown command '$cmd'"
-      __zgem::log error "Usage: $0 {bundle|source|update|clean}"
+      __zgem::log error "Usage: $0 { bundle | upgrade | list | update }"
       return 1
       ;;
   esac
@@ -48,18 +45,6 @@ function zgem {
 
 function __zgem::reload {
   exec "$SHELL" -l
-}
-
-function __zgem::clean {
-
-  if [[ -n "$1" ]]; then
-    local gem_name="$1"
-    __zgem::log info "Press ENTER to remove gem '$gem_name' from '$ZGEM_GEM_DIR/$gem_name'..." && read
-    rm -rf "$ZGEM_GEM_DIR/$gem_name"
-  else
-    __zgem::log info "Press ENTER to remove all gems from '$ZGEM_GEM_DIR/'..." && read
-    rm -rf "$ZGEM_GEM_DIR"
-  fi
 }
 
 function __zgem::list {
