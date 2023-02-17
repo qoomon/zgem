@@ -299,7 +299,8 @@ function __zgem::download::git {
       --single-branch  "$repo_url" "$clone_dir" \
       --depth 1 \
     && mv "$clone_dir/"*(DN) . \
-    && rmdir "$clone_dir"
+    && rmdir "$clone_dir" \
+    && echo .gem > .git/info/exclude
   )
 }
 
