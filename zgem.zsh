@@ -313,7 +313,7 @@ function __zgem::update::git {
     echo  "Last Commit Date : $(git --no-pager log -1 --format=%cd)"; 
     local latest_commit_after=$(git rev-parse HEAD)
     if [ $latest_commit_after != $latest_commit_before ]; then
-      git diff --name-status $latest_commit_before $latest_commit_after
+      git --no-pager diff --name-status $latest_commit_before $latest_commit_after
     fi
   )
 }
