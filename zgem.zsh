@@ -114,7 +114,7 @@ function __zgem::bundle {
     ### determin default protocol
     if [[ $location = *'.git' ]]; then
       protocol='git'
-    elif [[ $location = 'https://' ]] || [[ $location = 'http://' ]]; then
+    elif [[ $location = 'https://'* ]] || [[ $location = 'http://'* ]]; then
       protocol='http'
     else
       protocol='file'
