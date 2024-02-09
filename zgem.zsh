@@ -60,7 +60,7 @@ function __zgem::list_gem {
 }
 
 function __zgem::bundle {
-  
+
   if [[ $# == 0 ]]; then
     if [[ ! $ZGEM_UTILS_DIR ]]; then
       __zgem::log error "ZGEM_UTILS_DIR is not defined"
@@ -109,7 +109,7 @@ function __zgem::bundle {
         ;;
     esac
   done
-    
+
   if [[ -z $protocol ]]; then
     ### determin default protocol
     if [[ $location = *'.git' ]]; then
@@ -159,7 +159,7 @@ function __zgem::bundle {
     __zgem::log info "${fg_bold[green]}download ${fg_bold[magenta]}${gem_name}${reset_color}\n       ${fg_bold[yellow]}into${reset_color} '$gem_dir'\n       ${fg_bold[yellow]}from${reset_color} $protocol '$location'"
     __zgem::download::$protocol "$location" "$gem_dir"
   fi
-  
+
 
   ################ add gem ################
   local gem_path="$gem_dir/$gem_file"
@@ -287,7 +287,7 @@ function __zgem::name::git {
   echo ${${repo_url:t}%'.git'}
 }
 
-function __zgem::download::git {  
+function __zgem::download::git {
   local repo_url=${${1/%/#}[(ws:#:)1]} # get repo url
   local repo_branch=${${1/%/#}[(ws:#:)2]} # get repo branch
   local gem_dir="$2"
@@ -310,7 +310,7 @@ function __zgem::update::git {
     cd "$gem_dir"
     local latest_commit_before=$(git rev-parse HEAD)
     git pull # --depth 1
-    echo  "Last Commit Date : $(git --no-pager log -1 --format=%cd)"; 
+    echo  "Last Commit Date : $(git --no-pager log -1 --format=%cd)";
     local latest_commit_after=$(git rev-parse HEAD)
     if [ $latest_commit_after != $latest_commit_before ]; then
       git --no-pager diff --name-status $latest_commit_before $latest_commit_after
